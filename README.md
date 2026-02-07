@@ -115,23 +115,3 @@ cloudflared tunnel run echolingo-lab
 ```
 
 完成後即可從手機/平板透過 `https://lingo.hongjixuan-market-ledger.com` 連入測試。
-
-## GitHub 上傳指令（你建立好倉庫後）
-```bash
-git init
-git add .
-git commit -m "chore: prepare echolingo lab for public release"
-git branch -M main
-git remote add origin <YOUR_GITHUB_REPO_URL>
-git push -u origin main
-```
-
-若已經有 `origin`：
-```bash
-git remote set-url origin <YOUR_GITHUB_REPO_URL>
-git push -u origin main
-```
-
-## 備註
-- 目前資料庫與備份都在 `data/`，預設不會上傳到 GitHub。
-- API key 只放 `.env`，不要寫死在前端程式碼。

@@ -96,10 +96,10 @@ cloudflared tunnel create echolingo-lab
 ```bash
 cloudflared tunnel route dns echolingo-lab lingo.hongjixuan-market-ledger.com
 ```
-5. 建立設定檔 `%USERPROFILE%\\.cloudflared\\config.yml`：
+5. 若同網域已有其他專案，請建立獨立設定檔 `%USERPROFILE%\\.cloudflared\\echolingo-config.yml`（不要覆蓋原本 `config.yml`）：
 ```yml
-tunnel: echolingo-lab
-credentials-file: C:\Users\<你的帳號>\.cloudflared\<TUNNEL_ID>.json
+tunnel: <Echolingo_TUNNEL_ID>
+credentials-file: C:\Users\<你的帳號>\.cloudflared\<Echolingo_TUNNEL_ID>.json
 ingress:
   - hostname: lingo.hongjixuan-market-ledger.com
     service: http://localhost:5173
@@ -111,7 +111,7 @@ npm run dev:full
 ```
 7. 啟動 Tunnel：
 ```bash
-cloudflared tunnel run echolingo-lab
+cloudflared --config %USERPROFILE%\.cloudflared\echolingo-config.yml tunnel run
 ```
 
 完成後即可從手機/平板透過 `https://lingo.hongjixuan-market-ledger.com` 連入測試。

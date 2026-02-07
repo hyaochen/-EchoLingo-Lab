@@ -113,5 +113,6 @@ npm run dev:full
 ```bash
 cloudflared --config %USERPROFILE%\.cloudflared\echolingo-config.yml tunnel run
 ```
+或直接雙擊專案根目錄的 `start-echolingo-tunnel.bat`。
 
 完成後即可從手機/平板透過 `https://lingo.hongjixuan-market-ledger.com` 連入測試。

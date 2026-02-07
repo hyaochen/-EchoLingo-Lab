@@ -1901,6 +1901,12 @@ async function playSingleJapanese(item: JapaneseSentence): Promise<void> {
 
 function speakEnglishWord(item: EnglishWord, signal: AbortSignal): Promise<void> {
   const letters = extractSpelling(item.word).join(' ')
+  if (speechSettings.engine === 'openai') {
+    const spellOut = extractSpelling(item.word).join(', ')
+    const script = `${item.word}。${spellOut}。${item.meaningZh}。`
+    const volume = clampNumber((speechSettings.openAiVolumes.en + speechSettings.openAiVolumes.zh) / 2, 0, 1)
+    return speakSingleOpenAiText(script, signal, speechSettings.rates.en, volume)
+  }
 
   return speakByParts([
     { text: item.word, lang: 'en-US', rate: speechSettings.rates.en, pitch: speechSettings.pitches.en },
@@ -1910,10 +1916,52 @@ function speakEnglishWord(item: EnglishWord, signal: AbortSignal): Promise<void>
 }
 
 function speakJapaneseSentence(item: JapaneseSentence, signal: AbortSignal): Promise<void> {
+  if (speechSettings.engine === 'openai') {
+    const script = `${item.sentence}。${item.meaningZh}。`
+    const volume = clampNumber((speechSettings.openAiVolumes.ja + speechSettings.openAiVolumes.zh) / 2, 0, 1)
+    return speakSingleOpenAiText(script, signal, speechSettings.rates.ja, volume)
+  }
+
   return speakByParts([
     { text: item.sentence, lang: 'ja-JP', rate: speechSettings.rates.ja, pitch: speechSettings.pitches.ja },
     { text: item.meaningZh, lang: 'zh-TW', rate: speechSettings.rates.zh, pitch: speechSettings.pitches.zh }
   ], signal)
+}
+
+async function speakSingleOpenAiText(text: string, signal: AbortSignal, speed: number, volume: number): Promise<void> {
+  if (!providerStatus.tts.openai) {
+    toast('OpenAI TTS 尚未啟用')
+    return
+  }
+  if (signal.aborted) return
+
+  try {
+    const response = await apiFetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text,
+        voice: speechSettings.openAiVoice,
+        speed: clampNumber(speed, 0.6, 1.3)
+      })
+    })
+
+    if (!response.ok) {
+      const detail = await safeReadText(response)
+      toast(`OpenAI TTS 失敗：${detail}`)
+      return
+    }
+
+    const objectUrl = URL.createObjectURL(await response.blob())
+    const played = await playAudioUrl(objectUrl, signal, clampNumber(volume, 0, 1))
+    URL.revokeObjectURL(objectUrl)
+
+    if (!played && !signal.aborted) {
+      toast('OpenAI 音訊播放失敗，請再試一次')
+    }
+  } catch {
+    if (!signal.aborted) toast('OpenAI TTS 連線失敗')
+  }
 }
 
 function resolvePartVolume(part: SpeakPart, engine: 'browser' | 'openai'): number {
@@ -1965,8 +2013,12 @@ async function speakPartWithOpenAi(part: SpeakPart, signal: AbortSignal, volume:
     }
 
     const objectUrl = URL.createObjectURL(await response.blob())
-    await playAudioUrl(objectUrl, signal, volume)
+    const played = await playAudioUrl(objectUrl, signal, volume)
     URL.revokeObjectURL(objectUrl)
+    if (!played) {
+      maybeNotifyOpenAiFallback('OpenAI 音訊播放受限，已改用瀏覽器聲音')
+      return false
+    }
     return true
   } catch {
     maybeNotifyOpenAiFallback('OpenAI TTS 連線失敗，已改用瀏覽器聲音')
@@ -2010,10 +2062,10 @@ function speakPartWithBrowser(part: SpeakPart, signal: AbortSignal, volume: numb
   })
 }
 
-function playAudioUrl(url: string, signal: AbortSignal, volume: number): Promise<void> {
+function playAudioUrl(url: string, signal: AbortSignal, volume: number): Promise<boolean> {
   return new Promise((resolve) => {
     if (signal.aborted) {
-      resolve()
+      resolve(false)
       return
     }
 
@@ -2021,25 +2073,25 @@ function playAudioUrl(url: string, signal: AbortSignal, volume: number): Promise
     audio.volume = clampNumber(volume, 0, 1)
     activeAudio = audio
 
-    const finish = (): void => {
+    const finish = (ok: boolean): void => {
       signal.removeEventListener('abort', onAbort)
       audio.onended = null
       audio.onerror = null
       if (activeAudio === audio) activeAudio = null
-      resolve()
+      resolve(ok)
     }
 
     const onAbort = (): void => {
       audio.pause()
       audio.currentTime = 0
-      finish()
+      finish(false)
     }
 
-    audio.onended = finish
-    audio.onerror = finish
+    audio.onended = () => finish(true)
+    audio.onerror = () => finish(false)
     signal.addEventListener('abort', onAbort, { once: true })
 
-    void audio.play().catch(() => finish())
+    void audio.play().catch(() => finish(false))
   })
 }
 

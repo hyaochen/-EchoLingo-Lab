@@ -1,4 +1,4 @@
-services:
+﻿services:
   echolingo:
     build:
       context: .
@@ -16,3 +16,17 @@ services:
       VITE_ALLOWED_HOSTS: localhost,127.0.0.1
     volumes:
       - ./docker-data:/app/data
+
+  echolingo-tunnel:
+    build:
+      context: .
+      dockerfile: Dockerfile.cloudflared
+    container_name: echolingo-tunnel
+    restart: unless-stopped
+    depends_on:
+      - echolingo
+    command: tunnel --config /app/cloudflared-docker.yml run
+    volumes:
+      - ./cloudflared-docker.yml:/app/cloudflared-docker.yml:ro
+      - ${CLOUDFLARED_DIR}:/etc/cloudflared:ro
+

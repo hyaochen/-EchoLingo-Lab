@@ -6,3 +6,4 @@ dist
 data
 docker-data
 cloudflared-echolingo.log
+docker-data

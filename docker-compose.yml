@@ -1,0 +1,18 @@
+services:
+  echolingo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: echolingo
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+      - "8787:8787"
+    env_file:
+      - .env
+    environment:
+      API_PORT: 8787
+      WEB_PORT: 5173
+      VITE_ALLOWED_HOSTS: localhost,127.0.0.1
+    volumes:
+      - ./docker-data:/app/data

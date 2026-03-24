@@ -479,16 +479,23 @@ app.post('/api/tts', requireAuth, async (request, response) => {
   const text = String(request.body?.text ?? '').trim()
   const voice = String(request.body?.voice ?? 'alloy').trim() || 'alloy'
   const speed = clampNumber(Number(request.body?.speed ?? 1), 0.5, 1.5)
+  const account = (request as AuthRequest).auth?.account ?? '?'
+  const startMs = Date.now()
 
   if (!text) {
+    console.warn(`[TTS] ${account} → 400 text required`)
     response.status(400).json({ error: 'text required' })
     return
   }
 
   if (!OPENAI_API_KEY) {
+    console.warn(`[TTS] ${account} → 503 OPENAI_API_KEY not configured`)
     response.status(503).json({ error: 'OPENAI_API_KEY not configured' })
     return
   }
+
+  const preview = text.length > 60 ? text.slice(0, 60) + '…' : text
+  console.log(`[TTS] ${account} request: voice=${voice} speed=${speed} len=${text.length} "${preview}"`)
 
   try {
     const ttsResponse = await fetch('https://api.openai.com/v1/audio/speech', {
@@ -507,14 +514,21 @@ app.post('/api/tts', requireAuth, async (request, response) => {
 
     if (!ttsResponse.ok) {
       const message = await ttsResponse.text()
+      const elapsed = Date.now() - startMs
+      console.error(`[TTS] ${account} → OpenAI ${ttsResponse.status} (${elapsed}ms): ${message.slice(0, 300)}`)
       response.status(500).json({ error: `openai tts failed: ${message}` })
       return
     }
 
     const arrayBuffer = await ttsResponse.arrayBuffer()
+    const elapsed = Date.now() - startMs
+    const sizeKb = Math.round(arrayBuffer.byteLength / 1024)
+    console.log(`[TTS] ${account} → 200 OK (${elapsed}ms, ${sizeKb}KB)`)
     response.setHeader('Content-Type', 'audio/mpeg')
     response.send(Buffer.from(arrayBuffer))
-  } catch {
+  } catch (err) {
+    const elapsed = Date.now() - startMs
+    console.error(`[TTS] ${account} → exception (${elapsed}ms):`, err)
     response.status(500).json({ error: 'openai tts request failed' })
   }
 })

@@ -9,14 +9,42 @@ EchoLingo Lab 是一個可在電腦與手機使用的語言學習工具，支援
 - 播放控制：開始、暫停/續播、上一個、下一個、停止。
 - 分類學習：標籤群組播放、需加強清單。
 - 內容工作坊：RSS/News API/GNews 匯入、關鍵字搜尋、候選詞句加入。
-- 聲音設定：語速/聲調分語言設定，且 Browser 與 OpenAI 音量可分開設定。
+- 聲音設定：語速/聲調/音量皆以拉條（range slider）分語言調整，Browser 與 OpenAI 音量獨立設定。
+- TTS 改進：手機連續播放使用持久 Audio 元素避免自動播放被封鎖，伺服器端 TTS 請求日誌方便除錯。
 - 系統能力：深色模式、多使用者、管理後台、每日備份、匯入匯出。
 
 ## 技術架構
-- 前端：TypeScript + Vite
+- 前端：TypeScript + Vite（模組化架構，17 個獨立模組）
 - 後端：Node.js + Express + TypeScript
 - 儲存：`data/app-db.json`（檔案型）
 - 備份：`data/backups`（每日自動，可手動）
+- UI：響應式設計，自動偵測桌面/手機並給予最適佈局
+  - 桌面版（≥768px）：左側側欄導覽、寬鬆卡片佈局、橫排操作按鈕
+  - 手機版（<768px）：底部 Tab Bar、緊湊單欄佈局、PWA 支援
+
+### 前端模組結構
+```
+src/
+  main.ts               ← 入口點（精簡 bootstrap）
+  types.ts              ← TypeScript 型別定義
+  state.ts              ← 全域狀態管理
+  api.ts                ← API 呼叫封裝
+  utils.ts              ← 工具函式
+  auth.ts               ← 登入/登出邏輯
+  speech.ts             ← TTS 語音合成與播放控制
+  review.ts             ← 複習佇列管理
+  data.ts               ← 資料過濾、解析、持久化
+  renderBus.ts          ← 渲染事件匯流排
+  style.css             ← 響應式 CSS 設計系統
+  ui/
+    layout.ts           ← 側欄 App Shell
+    login.ts            ← 登入頁
+    english.ts          ← 英文單字頁籤
+    japanese.ts         ← 日文句子頁籤
+    content.ts          ← 內容工坊頁籤
+    speech-settings.ts  ← 語音設定頁籤（拉條式音量/語速控制）
+    admin.ts            ← 管理員後台頁籤
+```
 
 ## 安全與公開規範
 - `.env` 已在 `.gitignore`，不要提交任何真實 API key。

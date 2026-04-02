@@ -4,6 +4,12 @@ import express, { NextFunction, Request, Response } from 'express'
 import { XMLParser } from 'fast-xml-parser'
 import { promises as fs } from 'node:fs'
 import crypto from 'node:crypto'
+
+// Timing-safe string comparison
+function timingSafeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b))
+}
 import path from 'node:path'
 import { generateEnglishSeedWords, generateJapaneseSeedSentences } from '../src/seedData'
 
@@ -136,15 +142,33 @@ app.get('/api/health', (_request, response) => {
   response.json({ ok: true, now: new Date().toISOString() })
 })
 
+// Rate limiting
+const loginAttempts = new Map<string, { count: number; lastAttempt: number }>()
+const MAX_ATTEMPTS = 5
+const LOCKOUT_MS = 15 * 60 * 1000
+
 app.post('/api/auth/login', (request, response) => {
   const account = String(request.body?.account ?? '').trim()
   const password = String(request.body?.password ?? '').trim()
 
+  // Rate limit check
+  const record = loginAttempts.get(account)
+  if (record && record.count >= MAX_ATTEMPTS && Date.now() - record.lastAttempt < LOCKOUT_MS) {
+    const remaining = Math.ceil((LOCKOUT_MS - (Date.now() - record.lastAttempt)) / 60000)
+    response.status(429).json({ error: `登入嘗試過多，請 ${remaining} 分鐘後再試` })
+    return
+  }
+
   const user = database.users[account]
-  if (!user || user.password !== password) {
+  if (!user || !timingSafeCompare(user.password, password)) {
+    const r = loginAttempts.get(account) || { count: 0, lastAttempt: 0 }
+    r.count++; r.lastAttempt = Date.now()
+    loginAttempts.set(account, r)
     response.status(401).json({ error: '帳號或密碼錯誤' })
     return
   }
+  loginAttempts.delete(account)
+
   if (!user.active) {
     response.status(403).json({ error: '此帳號已停用，請聯絡管理員' })
     return

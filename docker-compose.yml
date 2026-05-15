@@ -4,10 +4,11 @@
       context: .
       dockerfile: Dockerfile
     container_name: echolingo
+    mem_limit: 512m
     restart: unless-stopped
     ports:
-      - "5173:5173"
-      - "8787:8787"
+      - "127.0.0.1:5173:5173"
+      - "127.0.0.1:8787:8787"
     env_file:
       - .env
     environment:

@@ -7,11 +7,11 @@ WEB_PORT="${WEB_PORT:-5173}"
 mkdir -p /app/data /app/data/backups
 
 echo "[lang] starting api on :${API_PORT}"
-npm run dev:api &
+npx tsx server/index.ts &
 API_PID=$!
 
-echo "[lang] starting web on :${WEB_PORT}"
-npx vite --host 0.0.0.0 --port "${WEB_PORT}" &
+echo "[lang] starting vite preview on :${WEB_PORT}"
+npx vite preview --host 0.0.0.0 --port "${WEB_PORT}" --strictPort &
 WEB_PID=$!
 
 cleanup() {

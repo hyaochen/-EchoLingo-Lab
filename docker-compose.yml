@@ -19,9 +19,7 @@
       - ./docker-data:/app/data
 
   echolingo-tunnel:
-    build:
-      context: .
-      dockerfile: Dockerfile.cloudflared
+    image: cloudflare/cloudflared:latest
     container_name: echolingo-tunnel
     restart: unless-stopped
     depends_on:

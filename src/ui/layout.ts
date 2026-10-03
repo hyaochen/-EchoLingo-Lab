@@ -6,23 +6,24 @@ import { stopAllPlayback } from '../review'
 import { logout } from '../auth'
 import { triggerRender } from '../renderBus'
 import { toast } from '../utils'
+import { icon, type IconName } from './icons'
 
 export function renderAppShell(appEl: HTMLElement): void {
   const isAdmin = authUser?.role === 'admin'
 
-  const navItems = [
-    { id: 'english', label: '英文單字', icon: '📚' },
-    { id: 'japanese', label: '日文句子', icon: '🇯🇵' },
-    { id: 'content', label: '內容工坊', icon: '📰' },
-    { id: 'speech', label: '聲音設定', icon: '🔊' },
-    ...(isAdmin ? [{ id: 'admin', label: '後台管理', icon: '⚙️' }] : [])
+  const navItems: Array<{ id: string; label: string; icon: IconName }> = [
+    { id: 'english', label: '英文單字', icon: 'book' },
+    { id: 'japanese', label: '日文句子', icon: 'languages' },
+    { id: 'content', label: '內容工坊', icon: 'newspaper' },
+    { id: 'speech', label: '聲音設定', icon: 'volume' },
+    ...(isAdmin ? [{ id: 'admin', label: '後台管理', icon: 'settings' as IconName }] : [])
   ]
 
   appEl.innerHTML = `
     <div class="app-layout">
       <aside class="sidebar">
         <div class="sidebar-header">
-          <span class="sidebar-logo-icon">🎧</span>
+          <span class="sidebar-logo-icon">${icon('headphones')}</span>
           <span class="sidebar-logo-text">EchoLingo</span>
         </div>
 
@@ -32,7 +33,7 @@ export function renderAppShell(appEl: HTMLElement): void {
               class="sidebar-nav-item ${activeTab === item.id ? 'is-active' : ''}"
               data-tab="${item.id}"
             >
-              <span class="nav-item-icon">${item.icon}</span>
+              <span class="nav-item-icon">${icon(item.icon)}</span>
               <span class="nav-item-label">${item.label}</span>
             </button>
           `).join('')}
@@ -48,7 +49,7 @@ export function renderAppShell(appEl: HTMLElement): void {
           </div>
           <div class="sidebar-actions">
             <button id="themeToggleBtn" class="icon-btn" title="${themeMode === 'dark' ? '切換淺色' : '切換深色'}">
-              ${themeMode === 'dark' ? '☀️' : '🌙'}
+              ${icon(themeMode === 'dark' ? 'sun' : 'moon')}
             </button>
             <button id="stopSpeechBtn" class="icon-btn" title="停止朗讀">⏹</button>
             <button id="logoutBtn" class="icon-btn icon-btn-danger" title="登出">↩</button>
@@ -67,7 +68,7 @@ export function renderAppShell(appEl: HTMLElement): void {
       <nav class="bottom-nav" aria-label="底部導覽">
         ${navItems.map((item) => `
           <button class="bottom-nav-item ${activeTab === item.id ? 'is-active' : ''}" data-tab="${item.id}">
-            <span class="nav-item-icon">${item.icon}</span>
+            <span class="nav-item-icon">${icon(item.icon)}</span>
             <span class="nav-item-label">${item.label}</span>
           </button>
         `).join('')}

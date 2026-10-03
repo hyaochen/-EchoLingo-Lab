@@ -1,12 +1,13 @@
 import { login } from '../auth'
 import { byId } from '../utils'
+import { icon } from './icons'
 
 export function renderLoginView(appEl: HTMLElement): void {
   appEl.innerHTML = `
     <div class="auth-wrap">
       <div class="auth-card">
         <div class="auth-logo">
-          <span class="auth-logo-icon">🎧</span>
+          <span class="auth-logo-icon">${icon('headphones')}</span>
           <h1>EchoLingo Lab</h1>
         </div>
         <p class="auth-subtitle">語言學習平台</p>

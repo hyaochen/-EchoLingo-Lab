@@ -88,7 +88,8 @@ h1, h2, h3 { margin: 0; line-height: 1.25; }
   flex-shrink: 0;
 }
 
-.sidebar-logo-icon { font-size: 1.3rem; }
+.ui-icon { display: block; width: 1em; height: 1em; flex-shrink: 0; }
+.sidebar-logo-icon { font-size: 1.3rem; display: inline-flex; align-items: center; color: var(--brand); }
 .sidebar-logo-text {
   font-size: 1.05rem;
   font-weight: 800;
@@ -134,7 +135,7 @@ h1, h2, h3 { margin: 0; line-height: 1.25; }
   font-weight: 700;
 }
 
-.nav-item-icon { font-size: 1rem; flex-shrink: 0; }
+.nav-item-icon { font-size: 1rem; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
 .nav-item-label { flex: 1; }
 
 .sidebar-footer {
@@ -288,7 +289,7 @@ h1, h2, h3 { margin: 0; line-height: 1.25; }
   margin-bottom: 0.3rem;
 }
 
-.auth-logo-icon { font-size: 1.75rem; }
+.auth-logo-icon { font-size: 1.75rem; display: inline-flex; align-items: center; color: var(--brand); }
 .auth-logo h1 { font-size: 1.45rem; font-weight: 800; }
 
 .auth-subtitle {

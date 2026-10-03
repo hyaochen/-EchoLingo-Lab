@@ -51,8 +51,8 @@ export function renderAppShell(appEl: HTMLElement): void {
             <button id="themeToggleBtn" class="icon-btn" title="${themeMode === 'dark' ? '切換淺色' : '切換深色'}">
               ${icon(themeMode === 'dark' ? 'sun' : 'moon')}
             </button>
-            <button id="stopSpeechBtn" class="icon-btn" title="停止朗讀">⏹</button>
-            <button id="logoutBtn" class="icon-btn icon-btn-danger" title="登出">↩</button>
+            <button id="stopSpeechBtn" class="icon-btn" title="停止朗讀" aria-label="停止朗讀">${icon('stop')}</button>
+            <button id="logoutBtn" class="icon-btn icon-btn-danger" title="登出" aria-label="登出">${icon('logout')}</button>
           </div>
         </div>
       </aside>

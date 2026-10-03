@@ -14,6 +14,7 @@ import { playSingleEnglish } from '../speech'
 import { autoTranslate } from '../data'
 import { uid, byId, escapeHtml, escapeHtmlAttr, toast } from '../utils'
 import { triggerRender } from '../renderBus'
+import { icon } from './icons'
 
 export function renderEnglishTab(): void {
   const panel = byId<HTMLDivElement>('tab-english')
@@ -84,11 +85,11 @@ export function renderEnglishTab(): void {
             ${englishReview.running ? '重新開始' : '開始'}
           </button>
           <button id="enPauseBtn" class="btn btn-secondary" ${englishReview.running ? '' : 'disabled'}>
-            ${englishReview.paused ? '▶ 續播' : '⏸ 暫停'}
+            ${icon(englishReview.paused ? 'play' : 'pause')}${englishReview.paused ? '續播' : '暫停'}
           </button>
-          <button id="enPrevBtn" class="btn btn-secondary" ${englishReview.running ? '' : 'disabled'}>◀ 上一個</button>
-          <button id="enNextBtn" class="btn btn-secondary" ${englishReview.running ? '' : 'disabled'}>▶ 下一個</button>
-          <button id="enStopBtn" class="btn btn-danger" ${englishReview.running ? '' : 'disabled'}>⏹ 停止</button>
+          <button id="enPrevBtn" class="btn btn-secondary" ${englishReview.running ? '' : 'disabled'}>${icon('skipBack')}上一個</button>
+          <button id="enNextBtn" class="btn btn-secondary" ${englishReview.running ? '' : 'disabled'}>${icon('skipForward')}下一個</button>
+          <button id="enStopBtn" class="btn btn-danger" ${englishReview.running ? '' : 'disabled'}>${icon('stop')}停止</button>
         </div>
       </article>
     </div>
@@ -231,10 +232,10 @@ function renderEnglishRow(item: EnglishWord): string {
         <div class="tag-bar">${tags}</div>
       </div>
       <div class="list-item-actions">
-        <button class="btn btn-secondary btn-sm" data-en-action="play" data-id="${escapeHtmlAttr(item.id)}">▶ 朗讀</button>
+        <button class="btn btn-secondary btn-sm" data-en-action="play" data-id="${escapeHtmlAttr(item.id)}">${icon('play')}朗讀</button>
         <button class="btn btn-secondary btn-sm" data-en-action="needs-work" data-id="${escapeHtmlAttr(item.id)}">${item.needsWork ? '取消加強' : '需加強'}</button>
         <button class="btn btn-secondary btn-sm" data-en-action="reviewed" data-id="${escapeHtmlAttr(item.id)}">✓ 已複習</button>
-        <button class="btn btn-secondary btn-sm" data-en-action="edit-tags" data-id="${escapeHtmlAttr(item.id)}">✎ 標籤</button>
+        <button class="btn btn-secondary btn-sm" data-en-action="edit-tags" data-id="${escapeHtmlAttr(item.id)}">${icon('pencil')}標籤</button>
         <button class="btn btn-danger btn-sm" data-en-action="delete" data-id="${escapeHtmlAttr(item.id)}">刪除</button>
       </div>
     </article>
